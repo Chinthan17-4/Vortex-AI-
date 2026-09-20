@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { processMessage, createMemory } from './Chatbot';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import Login from './pages/Login';
@@ -17,7 +16,6 @@ const DEMO_CHATS = [
     id: 'chat-1',
     title: 'Welcome to Vortex',
     group: 'Today',
-    memory: createMemory(),
     messages: [
       {
         id: 'msg-1',
@@ -47,35 +45,30 @@ const DEMO_CHATS = [
     id: 'chat-2',
     title: 'Project brainstorm ideas',
     group: 'Today',
-    memory: createMemory(),
     messages: [],
   },
   {
     id: 'chat-3',
     title: 'React component architecture',
     group: 'Yesterday',
-    memory: createMemory(),
     messages: [],
   },
   {
     id: 'chat-4',
     title: 'CSS grid layout help',
     group: 'Yesterday',
-    memory: createMemory(),
     messages: [],
   },
   {
     id: 'chat-5',
     title: 'API endpoint planning',
     group: 'Previous 7 Days',
-    memory: createMemory(),
     messages: [],
   },
   {
     id: 'chat-6',
     title: 'Database schema design',
     group: 'Previous 7 Days',
-    memory: createMemory(),
     messages: [],
   },
 ];
@@ -124,7 +117,6 @@ function App() {
       title: 'New Chat',
       group: 'Today',
       messages: [],
-      memory: createMemory(),
     };
     setChats((prev) => [newChat, ...prev]);
     setActiveChatId(newId);
@@ -136,7 +128,7 @@ function App() {
     setCurrentPage('chat');
   }, []);
 
-  const handleSendMessage = useCallback((text) => {
+  const handleSendMessage = useCallback(async (text) => {
     const userMsg = {
       id: 'msg-' + Date.now(),
       role: 'user',
@@ -155,7 +147,6 @@ function App() {
         title: text.slice(0, 40) + (text.length > 40 ? '…' : ''),
         group: 'Today',
         messages: [userMsg],
-        memory: createMemory(),
       };
 
       setChats((prev) => [newChat, ...prev]);
@@ -179,14 +170,23 @@ function App() {
       );
     }
 
-    // Ask the existing Vortex brain for a response
+    // Ask the existing backend for a response
     setIsTyping(true);
 
-    setTimeout(() => {
-      const currentChat = chats.find((chat) => chat.id === chatId);
-      const chatMemory = currentChat?.memory || createMemory();
+    setTimeout(async () => {
+      const response = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chatId: chatId,
+          message: text
+        })
+      });
 
-      const botResponse = processMessage(text, chatMemory);
+      const data = await response.json();
+      const botResponse = data.reply;
 
       const botMsg = {
         id: 'msg-' + Date.now() + '-bot',
