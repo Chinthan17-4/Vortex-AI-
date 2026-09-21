@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import VortexLogo from '../components/VortexLogo';
+import app from '../firebase';
 
 /**
  * Signup — Frontend-only signup page
@@ -12,16 +14,38 @@ function Signup({ onNavigate, onLogin }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const auth = getAuth(app);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Frontend-only — just navigate to chat
-    onLogin({
-      name: name || 'User',
-      email,
-      plan: 'Free Plan',
-    });
-    onNavigate('chat');
+
+    if (password !== confirmPassword) {
+      alert('Passwords do not match.');
+      return;
+    }
+
+    try {
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await updateProfile(result.user, {
+        displayName: name || 'User',
+      });
+
+      onLogin({
+        name: name || 'User',
+        email: result.user.email,
+        plan: 'Free Plan',
+      });
+
+      onNavigate('chat');
+    } catch (error) {
+      console.error('Signup failed:', error);
+      alert(error.message);
+    }
   };
 
   return (
