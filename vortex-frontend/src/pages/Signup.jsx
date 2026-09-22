@@ -4,11 +4,11 @@ import VortexLogo from '../components/VortexLogo';
 import app from '../firebase';
 
 /**
- * Signup — Frontend-only signup page
+ * Signup — Firebase authentication signup page
  * @param {function} onNavigate - Navigate to another page
- * @param {function} onLogin - Simulate account creation
  */
-function Signup({ onNavigate, onLogin }) {
+
+function Signup({ onNavigate }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,12 +33,6 @@ function Signup({ onNavigate, onLogin }) {
 
       await updateProfile(result.user, {
         displayName: name || 'User',
-      });
-
-      onLogin({
-        name: name || 'User',
-        email: result.user.email,
-        plan: 'Free Plan',
       });
 
       onNavigate('chat');

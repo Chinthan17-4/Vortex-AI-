@@ -8,7 +8,7 @@ import {
 import VortexLogo from '../components/VortexLogo';
 import app from '../firebase';
 
-function Login({ onNavigate, onLogin }) {
+function Login({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,12 +21,6 @@ function Login({ onNavigate, onLogin }) {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-
-      onLogin({
-        name: user.displayName || 'User',
-        email: user.email,
-        plan: 'Free Plan',
-      });
 
       onNavigate('chat');
     } catch (error) {
@@ -47,16 +41,10 @@ function Login({ onNavigate, onLogin }) {
 
       const user = result.user;
 
-      onLogin({
-        name: user.displayName || email.split('@')[0] || 'User',
-        email: user.email,
-        plan: 'Free Plan',
-      });
-
       onNavigate('chat');
     } catch (error) {
-      console.error('Email sign-in failed:', error);
-      alert('Invalid email or password.');
+      console.error('Email sign-in failed:', error.code, error.message);
+      alert(`${error.code}: ${error.message}`);
     }
   };
 

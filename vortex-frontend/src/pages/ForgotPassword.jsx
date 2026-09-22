@@ -1,17 +1,23 @@
 import { useState } from 'react';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import VortexLogo from '../components/VortexLogo';
+import app from '../firebase';
 
-/**
- * ForgotPassword — Frontend-only password reset page
- * @param {function} onNavigate - Navigate to another page
- */
 function ForgotPassword({ onNavigate }) {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const auth = getAuth(app);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSent(true);
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setSent(true);
+    } catch (error) {
+      console.error('Password reset failed:', error);
+      alert('Unable to send reset email. Please check the email address.');
+    }
   };
 
   return (
@@ -30,6 +36,7 @@ function ForgotPassword({ onNavigate }) {
             <p>
               We&apos;ve sent a password reset link to <strong>{email}</strong>
             </p>
+
             <button
               className="auth-submit"
               onClick={() => onNavigate('login')}
@@ -40,12 +47,20 @@ function ForgotPassword({ onNavigate }) {
           </div>
         ) : (
           <form className="auth-form" onSubmit={handleSubmit}>
-            <p style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
-              Enter the email address associated with your account and we&apos;ll send you a link to reset your password.
+            <p
+              style={{
+                fontSize: 'var(--font-sm)',
+                color: 'var(--text-muted)',
+                marginBottom: 'var(--space-sm)',
+              }}
+            >
+              Enter the email address associated with your account and we&apos;ll
+              send you a link to reset your password.
             </p>
 
             <div className="auth-field">
               <label htmlFor="reset-email">Email</label>
+
               <div className="auth-input-wrap">
                 <input
                   id="reset-email"
@@ -67,7 +82,10 @@ function ForgotPassword({ onNavigate }) {
 
         <div className="auth-footer">
           Remember your password?{' '}
-          <button onClick={() => onNavigate('login')} type="button">
+          <button
+            onClick={() => onNavigate('login')}
+            type="button"
+          >
             Sign in
           </button>
         </div>

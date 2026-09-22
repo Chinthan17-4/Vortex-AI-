@@ -1,4 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import app from './firebase';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 import Login from './pages/Login';
@@ -73,12 +75,6 @@ const DEMO_CHATS = [
   },
 ];
 
-const DEFAULT_USER = {
-  name: 'Chinthan Rai',
-  email: 'raichinthan17@gmail.com',
-  plan: 'Free Plan',
-};
-
 // -------------------------------------------------------
 // App — Central state management hub
 // -------------------------------------------------------
@@ -97,8 +93,27 @@ function App() {
   const [suggestionValue, setSuggestionValue] = useState('');
 
   // User (mock)
-  const [user, setUser] = useState(DEFAULT_USER);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  useEffect(() => {
+    const auth = getAuth(app);
 
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          email: firebaseUser.email,
+          plan: 'Free Plan',
+        });
+      } else {
+        setUser(null);
+      }
+
+      setAuthLoading(false);
+    });
+
+    return unsubscribe;
+  }, []);
   // ---- Derived state ----
   const activeChat = chats.find((c) => c.id === activeChatId);
   const activeMessages = activeChat?.messages || [];
@@ -218,10 +233,6 @@ function App() {
     setSuggestionValue('');
   }, []);
 
-  const handleLogin = useCallback((userData) => {
-    setUser(userData);
-  }, []);
-
   const toggleSidebar = useCallback(() => {
     setSidebarOpen((prev) => !prev);
   }, []);
@@ -230,12 +241,20 @@ function App() {
     setSidebarOpen(false);
   }, []);
 
+  if (authLoading) {
+    return null;
+  }
+
+  if (!user) {
+    return <Login onNavigate={handleNavigate} />;
+  }
+
   // ---- Auth pages (full-screen, no sidebar) ----
   if (currentPage === 'login') {
-    return <Login onNavigate={handleNavigate} onLogin={handleLogin} />;
+    return <Login onNavigate={handleNavigate} />;
   }
   if (currentPage === 'signup') {
-    return <Signup onNavigate={handleNavigate} onLogin={handleLogin} />;
+    return <Signup onNavigate={handleNavigate} />;
   }
   if (currentPage === 'forgot-password') {
     return <ForgotPassword onNavigate={handleNavigate} />;
