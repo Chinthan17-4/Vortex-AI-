@@ -7,7 +7,7 @@ const app = express();
 
 
 const PORT = process.env.PORT || 5000; // .env patterns
-const chatMemories = new Map();
+const userMemories = new Map();
 app.use(cors());
 app.use(express.json());
 
@@ -16,20 +16,25 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/chat", (req, res) => {
-    const { message, chatId } = req.body;
+    const { message, chatId, userId } = req.body;
 
-    if (!message || !chatId) {
+    if (!message || !chatId || !userId) {
         return res.status(400).json({
-            error: "message and chatId are required"
+            error: "message, chatId and userId are required"
         });
     }
 
-    if (!chatMemories.has(chatId)) {
-        chatMemories.set(chatId, createMemory());
+    if (!userMemories.has(userId)) {
+        userMemories.set(userId, new Map());
     }
 
-    const memory = chatMemories.get(chatId);
+    const userChats = userMemories.get(userId);
 
+    if (!userChats.has(chatId)) {
+        userChats.set(chatId, createMemory());
+    }
+
+    const memory = userChats.get(chatId);
     const reply = processMessage(message, memory);
 
     res.json({

@@ -101,6 +101,7 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser({
+          uid: firebaseUser.uid,
           name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
           email: firebaseUser.email,
           plan: 'Free Plan',
@@ -144,6 +145,14 @@ function App() {
   }, []);
 
   const handleSendMessage = useCallback(async (text) => {
+    const auth = getAuth(app);
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      console.error("No authenticated Firebase user found.");
+      return;
+    }
+
     const userMsg = {
       id: 'msg-' + Date.now(),
       role: 'user',
@@ -195,6 +204,7 @@ function App() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
+          userId: currentUser.uid,
           chatId: chatId,
           message: text
         })
@@ -223,7 +233,7 @@ function App() {
 
       setIsTyping(false);
     }, 700);
-  }, [activeChatId, chats]);
+  }, [activeChatId]);
 
   const handleSuggestionClick = useCallback((prompt) => {
     setSuggestionValue(prompt);
