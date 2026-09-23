@@ -92,6 +92,15 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [suggestionValue, setSuggestionValue] = useState('');
 
+  const [theme, setTheme] = useState(
+    localStorage.getItem('vortex-theme') || 'dark'
+  );
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('vortex-theme', theme);
+  }, [theme]);
+
   // User (mock)
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -274,7 +283,14 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'settings':
-        return <Settings onNavigate={handleNavigate} onToggleSidebar={toggleSidebar} />;
+        return (
+          <Settings
+            onNavigate={handleNavigate}
+            onToggleSidebar={toggleSidebar}
+            theme={theme}
+            onThemeChange={setTheme}
+          />
+        );
       case 'usage':
         return <Usage onNavigate={handleNavigate} onToggleSidebar={toggleSidebar} />;
       case 'help':

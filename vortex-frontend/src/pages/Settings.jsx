@@ -4,12 +4,16 @@ import { useState } from 'react';
  * Settings — Full settings page with sectioned layout
  * All settings use local frontend state only
  */
-function Settings({ onNavigate, onToggleSidebar }) {
+function Settings({
+  onNavigate,
+  onToggleSidebar,
+  theme,
+  onThemeChange,
+}) {
   const [settings, setSettings] = useState({
     language: 'en',
     enterToSend: true,
     autoScroll: true,
-    theme: 'dark',
     saveHistory: true,
     showTimestamps: true,
     responseStyle: 'balanced',
@@ -112,12 +116,11 @@ function Settings({ onNavigate, onToggleSidebar }) {
             </div>
             <select
               className="settings-select"
-              value={settings.theme}
-              onChange={(e) => updateSetting('theme', e.target.value)}
+              value={theme}
+              onChange={(e) => onThemeChange(e.target.value)}
             >
               <option value="dark">Dark</option>
-              <option value="light">Light (Coming soon)</option>
-              <option value="system">System</option>
+              <option value="light">Light</option>
             </select>
           </div>
         </section>
