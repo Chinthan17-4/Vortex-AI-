@@ -63,9 +63,9 @@ function Settings({ onNavigate, onToggleSidebar }) {
               onChange={(e) => updateSetting('language', e.target.value)}
             >
               <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
+              <option value="hi">Hindi</option>
+              <option value="kan">Kannada</option>
+              <option value="tn">Tamil</option>
               <option value="ja">日本語</option>
             </select>
           </div>
