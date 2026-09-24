@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import app from './firebase';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
+import SearchDialog from './components/SearchDialog';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
@@ -91,6 +92,7 @@ function App() {
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [suggestionValue, setSuggestionValue] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const [theme, setTheme] = useState(
     localStorage.getItem('vortex-theme') || 'dark'
@@ -152,6 +154,20 @@ function App() {
     setActiveChatId(chatId);
     setCurrentPage('chat');
   }, []);
+  useEffect(() => {
+    const handleKeyboardShortcuts = (e) => {
+      if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyboardShortcuts);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyboardShortcuts);
+    };
+  }, [handleNewChat]);
 
   const handleSendMessage = useCallback(async (text) => {
     const auth = getAuth(app);
@@ -328,6 +344,13 @@ function App() {
         onCloseSidebar={closeSidebar}
       />
       {renderPage()}
+      {searchOpen && (
+        <SearchDialog
+          chats={chats}
+          onSelect={handleSelectChat}
+          onClose={() => setSearchOpen(false)}
+        />
+      )}
     </div>
   );
 }
