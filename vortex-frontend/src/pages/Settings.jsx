@@ -9,6 +9,9 @@ function Settings({
   onToggleSidebar,
   theme,
   onThemeChange,
+  onClearHistory,
+  soundEnabled,
+  onSoundChange,
 }) {
   const [settings, setSettings] = useState({
     language: 'en',
@@ -18,7 +21,6 @@ function Settings({
     showTimestamps: true,
     responseStyle: 'balanced',
     emailNotifications: false,
-    soundEnabled: true,
   });
 
   const [clearConfirm, setClearConfirm] = useState(false);
@@ -82,8 +84,8 @@ function Settings({
             <label className="toggle-switch">
               <input
                 type="checkbox"
-                checked={settings.enterToSend}
-                onChange={(e) => updateSetting('enterToSend', e.target.checked)}
+                checked={soundEnabled}
+                onChange={(e) => onSoundChange(e.target.checked)}
               />
               <span className="toggle-slider" />
             </label>
@@ -229,7 +231,14 @@ function Settings({
             </div>
             {clearConfirm ? (
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="settings-btn danger" onClick={() => setClearConfirm(false)} type="button">
+                <button
+                  className="settings-btn danger"
+                  onClick={() => {
+                    onClearHistory();
+                    setClearConfirm(false);
+                  }}
+                  type="button"
+                >
                   Confirm
                 </button>
                 <button className="settings-btn" onClick={() => setClearConfirm(false)} type="button">

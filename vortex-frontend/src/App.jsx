@@ -98,6 +98,14 @@ function App() {
     localStorage.getItem('vortex-theme') || 'dark'
   );
 
+  const [soundEnabled, setSoundEnabled] = useState(
+    localStorage.getItem('vortex-sound') !== 'false'
+  );
+
+  useEffect(() => {
+    localStorage.setItem('vortex-sound', soundEnabled);
+  }, [soundEnabled]);
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('vortex-theme', theme);
@@ -147,6 +155,12 @@ function App() {
     };
     setChats((prev) => [newChat, ...prev]);
     setActiveChatId(newId);
+    setCurrentPage('chat');
+  }, []);
+
+  const handleClearHistory = useCallback(() => {
+    setChats([]);
+    setActiveChatId(null);
     setCurrentPage('chat');
   }, []);
 
@@ -305,6 +319,9 @@ function App() {
             onToggleSidebar={toggleSidebar}
             theme={theme}
             onThemeChange={setTheme}
+            onClearHistory={handleClearHistory}
+            soundEnabled={soundEnabled}
+            onSoundChange={setSoundEnabled}
           />
         );
       case 'usage':
