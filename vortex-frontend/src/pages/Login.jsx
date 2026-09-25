@@ -3,7 +3,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  GithubAuthProvider,
 } from 'firebase/auth';
 import VortexLogo from '../components/VortexLogo';
 import app from '../firebase';
@@ -24,6 +25,16 @@ function Login({ onNavigate }) {
     } catch (error) {
       console.error('Google sign-in failed:', error);
       alert(error.message);
+    }
+  };
+
+  const handleGithubLogin = async () => {
+    try {
+      const provider = new GithubAuthProvider();
+
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("GitHub sign-in failed:", error);
     }
   };
 
@@ -88,6 +99,22 @@ function Login({ onNavigate }) {
           <span className="google-label">Continue with Google</span>
         </button>
         {/* Divider */}
+        <button
+          className="github-login-btn"
+          onClick={handleGithubLogin}
+          type="button"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.48v-1.7c-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .08 1.53 1.06 1.53 1.06.9 1.58 2.35 1.12 2.93.86.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.02-2.75-.1-.26-.44-1.3.1-2.71 0 0 .83-.27 2.75 1.05A9.1 9.1 0 0 1 12 7.85c.85 0 1.71.12 2.51.35 1.92-1.32 2.75-1.05 2.75-1.05.54 1.41.2 2.45.1 2.71.63.72 1.02 1.63 1.02 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.59.69.48A10.27 10.27 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
+          </svg>
+          Continue with GitHub
+        </button>
         <div className="auth-divider">
           <span>OR</span>
         </div>
