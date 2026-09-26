@@ -2,9 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { processMessage, createMemory } from "./chatbot/Chatbot.js";
+import connectDB from "./config/db.js";
 dotenv.config();
 const app = express();
-
+connectDB();
 
 const PORT = process.env.PORT || 5000; // .env patterns
 const userMemories = new Map();
