@@ -125,6 +125,25 @@ function App() {
           email: firebaseUser.email,
           plan: 'Free Plan',
         });
+        fetch(`http://localhost:5000/api/chats/${firebaseUser.uid}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const loadedChats = data.map((chat) => ({
+              id: chat.chatId,
+              title: chat.title,
+              group: "Today",
+              messages: [],
+            }));
+
+            setChats(loadedChats);
+
+            if (loadedChats.length > 0) {
+              setActiveChatId(loadedChats[0].id);
+            }
+          })
+          .catch((error) => {
+            console.error("Failed to load chats:", error);
+          }); // your existing MongoDB conversations can start appearing in the Vortex UI
       } else {
         setUser(null);
       }
@@ -164,10 +183,37 @@ function App() {
     setCurrentPage('chat');
   }, []);
 
-  const handleSelectChat = useCallback((chatId) => {
+  const handleSelectChat = useCallback(async (chatId) => {
     setActiveChatId(chatId);
     setCurrentPage('chat');
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/chats/${chatId}/messages`
+      );
+
+      const messages = await response.json();
+
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === chatId
+            ? {
+              ...chat,
+              messages: messages.map((msg) => ({
+                id: msg.messageId,
+                role: msg.role,
+                content: msg.content,
+                timestamp: msg.createdAt,
+              })),
+            }
+            : chat
+        )
+      );
+    } catch (error) {
+      console.error("Failed to load messages:", error);
+    }
   }, []);
+
   useEffect(() => {
     const handleKeyboardShortcuts = (e) => {
       if (e.ctrlKey && e.key.toLowerCase() === 'k') {

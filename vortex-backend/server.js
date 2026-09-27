@@ -3,6 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { processMessage, createMemory } from "./chatbot/Chatbot.js";
 import connectDB from "./config/db.js";
+import Chat from "./models/Chat.js";
+import Message from "./models/Message.js";
+
 dotenv.config();
 const app = express();
 connectDB();
@@ -16,7 +19,41 @@ app.get("/", (req, res) => {
     res.send("Vortex Backend is running 🚀");
 });
 
-app.post("/api/chat", (req, res) => {
+app.get("/api/chats/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const chats = await Chat.find({ userId })
+            .sort({ updatedAt: -1 });
+
+        res.json(chats);
+    } catch (error) {
+        console.error("Failed to fetch chats:", error.message);
+
+        res.status(500).json({
+            error: "Failed to fetch chats"
+        });
+    }
+});
+
+app.get("/api/chats/:chatId/messages", async (req, res) => {
+    try {
+        const { chatId } = req.params;
+
+        const messages = await Message.find({ chatId })
+            .sort({ createdAt: 1 });  // retrieves the data (chats history) in order of oldest to newest
+
+        res.json(messages);
+    } catch (error) {
+        console.error("Failed to fetch messages:", error.message);
+
+        res.status(500).json({
+            error: "Failed to fetch messages"
+        });
+    }
+});
+
+app.post("/api/chat", async (req, res) => {
     const { message, chatId, userId } = req.body;
 
     if (!message || !chatId || !userId) {
@@ -37,6 +74,33 @@ app.post("/api/chat", (req, res) => {
 
     const memory = userChats.get(chatId);
     const reply = processMessage(message, memory);
+
+    await Message.create({
+        messageId: `msg-${Date.now()}-bot`,
+        chatId,
+        role: "assistant",
+        content: reply
+    }); // stores Vortex reply in Mongodb
+
+    const chat = await Chat.findOneAndUpdate(
+        { chatId },
+        {
+            chatId,
+            userId,
+            title: message.slice(0, 40)
+        },
+        {
+            new: true,
+            upsert: true
+        }
+    );
+
+    await Message.create({
+        messageId: `msg-${Date.now()}`,
+        chatId,
+        role: "user",
+        content: message
+    });
 
     res.json({
         reply: reply
