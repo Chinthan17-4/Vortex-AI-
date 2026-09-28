@@ -76,11 +76,11 @@ app.post("/api/chat", async (req, res) => {
     const reply = processMessage(message, memory);
 
     await Message.create({
-        messageId: `msg-${Date.now()}-bot`,
+        messageId: `msg-${Date.now()}`,
         chatId,
-        role: "assistant",
-        content: reply
-    }); // stores Vortex reply in Mongodb
+        role: "user",
+        content: message
+    });
 
     const chat = await Chat.findOneAndUpdate(
         { chatId },
@@ -96,15 +96,42 @@ app.post("/api/chat", async (req, res) => {
     );
 
     await Message.create({
-        messageId: `msg-${Date.now()}`,
+        messageId: `msg-${Date.now()}-bot`,
         chatId,
-        role: "user",
-        content: message
+        role: "assistant",
+        content: reply
     });
 
     res.json({
         reply: reply
     });
+});
+
+app.delete("/api/chats/user/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const chats = await Chat.find({ userId });
+        const chatIds = chats.map((chat) => chat.chatId);
+
+        await Message.deleteMany({
+            chatId: { $in: chatIds }
+        });
+
+        await Chat.deleteMany({
+            userId
+        });
+
+        res.json({
+            message: "Chat history cleared successfully"
+        });
+    } catch (error) {
+        console.error("Failed to clear chat history:", error.message);
+
+        res.status(500).json({
+            error: "Failed to clear chat history"
+        });
+    }
 });
 
 app.listen(PORT, () => {

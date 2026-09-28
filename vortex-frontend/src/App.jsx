@@ -138,7 +138,32 @@ function App() {
             setChats(loadedChats);
 
             if (loadedChats.length > 0) {
-              setActiveChatId(loadedChats[0].id);
+              const firstChatId = loadedChats[0].id;
+
+              setActiveChatId(firstChatId);
+
+              fetch(`http://localhost:5000/api/chats/${firstChatId}/messages`)
+                .then((response) => response.json())
+                .then((messages) => {
+                  setChats((prev) =>
+                    prev.map((chat) =>
+                      chat.id === firstChatId
+                        ? {
+                          ...chat,
+                          messages: messages.map((msg) => ({
+                            id: msg.messageId,
+                            role: msg.role,
+                            content: msg.content,
+                            timestamp: msg.createdAt,
+                          })),
+                        }
+                        : chat
+                    )
+                  );
+                })
+                .catch((error) => {
+                  console.error("Failed to load initial chat messages:", error);
+                });
             }
           })
           .catch((error) => {
@@ -177,10 +202,33 @@ function App() {
     setCurrentPage('chat');
   }, []);
 
-  const handleClearHistory = useCallback(() => {
-    setChats([]);
-    setActiveChatId(null);
-    setCurrentPage('chat');
+  const handleClearHistory = useCallback(async () => {
+    const auth = getAuth(app);
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      console.error("No authenticated Firebase user found.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/chats/user/${currentUser.uid}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to clear chat history");
+      }
+
+      setChats([]);
+      setActiveChatId(null);
+      setCurrentPage('chat');
+    } catch (error) {
+      console.error("Failed to clear chat history:", error);
+    }
   }, []);
 
   const handleSelectChat = useCallback(async (chatId) => {

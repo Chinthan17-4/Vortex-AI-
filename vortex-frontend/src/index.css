@@ -2712,7 +2712,7 @@ a:hover {
   flex: 1;
   overflow-y: auto;
   padding: var(--sp-2xl) var(--sp-3xl);
-  max-width: 680px;
+  max-width: none;
   position: relative;
   z-index: 1;
 }
