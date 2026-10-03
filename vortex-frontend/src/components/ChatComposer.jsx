@@ -45,6 +45,11 @@ function ChatComposer({ onSend, selectedModel = 'Vortex Fast', initialValue = ''
 
   return (
     <div className="composer-wrapper">
+      <div className="composer-sparkle" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0L14.2 9.8L24 12L14.2 14.2L12 24L9.8 14.2L0 12L9.8 9.8L12 0Z" />
+        </svg>
+      </div>
       <div className="chat-composer">
         <div className="composer-input-area">
           <textarea

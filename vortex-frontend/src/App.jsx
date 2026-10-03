@@ -453,6 +453,8 @@ function App() {
         user={user}
         sidebarOpen={sidebarOpen}
         onCloseSidebar={closeSidebar}
+        theme={theme}
+        onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
       />
       {renderPage()}
       {searchOpen && (

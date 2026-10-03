@@ -29,8 +29,11 @@ const SUGGESTIONS = [
 function WelcomeScreen({ onSuggestionClick }) {
   return (
     <section className="welcome-screen">
-      <div className="welcome-logo">
-        <VortexLogo size={88} />
+      <div className="welcome-logo-container">
+        <div className="welcome-logo-nebula" aria-hidden="true" />
+        <div className="welcome-logo">
+          <VortexLogo size={110} />
+        </div>
       </div>
 
       <p className="welcome-subtitle">Welcome to Vortex AI</p>

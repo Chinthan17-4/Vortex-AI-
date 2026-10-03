@@ -4,7 +4,7 @@ import VortexLogo from '../components/VortexLogo';
 /**
  * Help — Help & About page with FAQ accordion
  */
-function Help({ onNavigate, onToggleSidebar }) {
+function Help({ onNavigate, _onToggleSidebar }) {
   const [openFaq, setOpenFaq] = useState(null);
 
   const faqs = [

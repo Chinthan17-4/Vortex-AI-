@@ -84,8 +84,8 @@ function Settings({
             <label className="toggle-switch">
               <input
                 type="checkbox"
-                checked={soundEnabled}
-                onChange={(e) => onSoundChange(e.target.checked)}
+                checked={settings.enterToSend}
+                onChange={(e) => updateSetting('enterToSend', e.target.checked)}
               />
               <span className="toggle-slider" />
             </label>
@@ -205,8 +205,8 @@ function Settings({
             <label className="toggle-switch">
               <input
                 type="checkbox"
-                checked={settings.soundEnabled}
-                onChange={(e) => updateSetting('soundEnabled', e.target.checked)}
+                checked={soundEnabled}
+                onChange={(e) => onSoundChange(e.target.checked)}
               />
               <span className="toggle-slider" />
             </label>

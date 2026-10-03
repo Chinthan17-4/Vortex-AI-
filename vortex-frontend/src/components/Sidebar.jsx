@@ -16,8 +16,11 @@ function Sidebar({
   user,
   sidebarOpen,
   onCloseSidebar,
+  theme = 'dark',
+  onToggleTheme,
 }) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState({});
 
   // Group chats by their group label
   const groups = {};
@@ -26,6 +29,13 @@ function Sidebar({
     if (!groups[label]) groups[label] = [];
     groups[label].push(chat);
   });
+
+  const toggleGroup = (label) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
+  };
 
   const handleNavClick = (page) => {
     onNavigate(page);
@@ -43,13 +53,43 @@ function Sidebar({
         {/* Header */}
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <div className="brand">
-              <div className="brand-logo-wrap">
-                <VortexLogo size={30} />
-              </div>
-              <div className="brand-text">
-                <h2>VORTEX</h2>
-                <span>AI Workspace</span>
+            <div className="sidebar-brand-left">
+              {onToggleTheme && (
+                <button
+                  className="sidebar-theme-btn"
+                  onClick={onToggleTheme}
+                  type="button"
+                  aria-label="Toggle theme"
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                >
+                  {theme === 'dark' ? (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                  ) : (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="5" />
+                      <line x1="12" y1="1" x2="12" y2="3" />
+                      <line x1="12" y1="21" x2="12" y2="23" />
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                      <line x1="1" y1="12" x2="3" y2="12" />
+                      <line x1="21" y1="12" x2="23" y2="12" />
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                  )}
+                </button>
+              )}
+
+              <div className="brand">
+                <div className="brand-logo-wrap">
+                  <VortexLogo size={22} />
+                </div>
+                <div className="brand-text">
+                  <h2>VORTEX</h2>
+                  <span>AI Workspace</span>
+                </div>
               </div>
             </div>
 
@@ -74,7 +114,7 @@ function Sidebar({
             onClick={() => { onNewChat(); onCloseSidebar(); }}
             type="button"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
@@ -109,34 +149,47 @@ function Sidebar({
 
         {/* Chat History */}
         <div className="chat-history">
-          {Object.entries(groups).map(([label, items]) => (
-            <div className="chat-history-group" key={label}>
-              <div className="chat-history-label">
-                <span>{label}</span>
-                <button type="button" aria-label="Toggle group">⌄</button>
-              </div>
-              {items.map((chat) => (
+          {Object.entries(groups).map(([label, items]) => {
+            const isCollapsed = collapsedGroups[label];
+            return (
+              <div className="chat-history-group" key={label}>
                 <div
-                  key={chat.id}
-                  className={`chat-item${chat.id === activeChatId ? ' active' : ''}`}
-                  onClick={() => { onSelectChat(chat.id); onCloseSidebar(); }}
+                  className="chat-history-label"
+                  onClick={() => toggleGroup(label)}
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { onSelectChat(chat.id); onCloseSidebar(); } }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') toggleGroup(label); }}
                 >
-                  <span className="chat-item-title">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  <span>{label.toUpperCase()}</span>
+                  <span className={`group-chevron${isCollapsed ? ' collapsed' : ''}`}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9" />
                     </svg>
-                    {chat.title}
                   </span>
-                  <button className="chat-item-menu" type="button" aria-label="Chat options" onClick={(e) => e.stopPropagation()}>
-                    ⋯
-                  </button>
                 </div>
-              ))}
-            </div>
-          ))}
+                {!isCollapsed && items.map((chat) => (
+                  <div
+                    key={chat.id}
+                    className={`chat-item${chat.id === activeChatId ? ' active' : ''}`}
+                    onClick={() => { onSelectChat(chat.id); onCloseSidebar(); }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { onSelectChat(chat.id); onCloseSidebar(); } }}
+                  >
+                    <span className="chat-item-title">
+                      <svg className="chat-bubble-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                      {chat.title}
+                    </span>
+                    <button className="chat-item-menu" type="button" aria-label="Chat options" onClick={(e) => e.stopPropagation()}>
+                      ⋯
+                    </button>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </div>
 
         {/* Upgrade Card */}

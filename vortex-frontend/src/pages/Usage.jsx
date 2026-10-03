@@ -2,7 +2,7 @@
  * Usage — Frontend-only Plan & Usage page
  * All values are hardcoded placeholders
  */
-function Usage({ onNavigate, onToggleSidebar }) {
+function Usage({ onNavigate, _onToggleSidebar }) {
   return (
     <main className="chat-main">
       <header className="page-header">

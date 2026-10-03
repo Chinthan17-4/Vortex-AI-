@@ -11,7 +11,7 @@ function VortexLogo({ size = 48, className = '' }) {
     <img
       src="/vortex_horizon_logo.png"
       alt="Vortex AI logo"
-      className={className}
+      className={`vortex-logo ${className}`.trim()}
       style={{
         display: 'block',
         objectFit: 'contain',
