@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { processMessage, createMemory } from "./chatbot/Chatbot.js";
+import { generateAIResponse } from "./services/gemini.js";
 import connectDB from "./config/db.js";
 import Chat from "./models/Chat.js";
 import Message from "./models/Message.js";
@@ -73,8 +74,21 @@ app.post("/api/chat", async (req, res) => {
     }
 
     const memory = userChats.get(chatId);
-    const reply = processMessage(message, memory);
 
+    const previousMessages = await Message.find({ chatId })
+        .sort({ createdAt: 1 })
+        .limit(20);
+
+    const history = previousMessages.map((msg) => ({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [
+            {
+                text: msg.content
+            }
+        ]
+    }));
+
+    const reply = await generateAIResponse(message, history);
     await Message.create({
         messageId: `msg-${Date.now()}`,
         chatId,
