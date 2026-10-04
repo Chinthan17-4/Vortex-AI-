@@ -34,6 +34,21 @@ Be helpful, clear, concise, and natural.
         return response.text;
     } catch (error) {
         console.error("Gemini API error:", error);
-        throw error
+
+        if (error.status === 503) {
+            throw new Error(
+                "Vortex is temporarily busy. Please try again in a moment."
+            );
+        }
+
+        if (error.status === 429) {
+            throw new Error(
+                "Vortex has reached the current API limit. Please try again later."
+            );
+        }
+
+        throw new Error(
+            "Vortex couldn't generate a response right now. Please try again."
+        );
     }
 };

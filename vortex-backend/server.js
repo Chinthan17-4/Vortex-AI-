@@ -140,10 +140,10 @@ app.delete("/api/chats/user/:userId", async (req, res) => {
             message: "Chat history cleared successfully"
         });
     } catch (error) {
-        console.error("Failed to clear chat history:", error.message);
+        console.error("Chat request failed:", error.message);
 
         res.status(500).json({
-            error: "Failed to clear chat history"
+            error: error.message
         });
     }
 });
