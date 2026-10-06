@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
+import { VORTEX_SYSTEM_PROMPT } from "../config/ai.js";
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
@@ -11,15 +12,7 @@ export const generateAIResponse = async (message, history = []) => {
             model: "gemini-3.5-flash-lite",
 
             config: {
-                systemInstruction: `
-You are Vortex AI, the AI assistant inside the Vortex application.
-
-Your name is Vortex.
-
-Never identify yourself as Gemini, Google AI, or Assistant unless the user explicitly asks about the underlying model or technology.
-
-Be helpful, clear, concise, and natural.
-`
+                systemInstruction: VORTEX_SYSTEM_PROMPT
             },
 
             contents: [
@@ -31,7 +24,13 @@ Be helpful, clear, concise, and natural.
             ]
         });
 
-        return response.text;
+        const reply = response.text;
+
+        if (!reply || !reply.trim()) {
+            throw new Error("Vortex received an empty response.");
+        }
+
+        return reply;
     } catch (error) {
         console.error("Gemini API error:", error);
 
